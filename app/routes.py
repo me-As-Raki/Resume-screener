@@ -53,11 +53,9 @@ def login():
             flash('Invalid email or password.')
     return render_template('login.html')
 # -------------------- ROOT PAGE --------------------
-# -------------------- ROOT REDIRECT --------------------
 @main.route('/')
-def index():
+def root():
     return redirect(url_for('main.login'))
-
 
 # -------------------- LOGOUT --------------------
 @main.route('/logout')

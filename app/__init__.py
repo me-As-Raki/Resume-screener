@@ -2,7 +2,7 @@ from flask import Flask
 from config import Config
 from app.extensions import db, migrate, login_manager
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv()  # Load environment variables from .env
 
 def create_app():
     app = Flask(__name__)
@@ -22,6 +22,6 @@ def create_app():
     from app.routes import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
-    from app import models  # Make sure all models are registered
+    from app import models  # Register models for migrations
 
     return app
