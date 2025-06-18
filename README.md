@@ -1,7 +1,7 @@
 # 🧠 Resume Screener — JD Matcher with AI Suggestions 📄🤖
 
 **Screen smarter, not harder!**  
-A full-featured Flask web app that automates resume screening by comparing resumes against job descriptions using AI (OpenAI/Gemini), and gives instant match scores, smart suggestions, and visual insights.
+A full-featured Flask web app that automates resume screening by comparing resumes against job descriptions using AI (Gemini), and gives instant match scores, smart suggestions, and visual insights.
 
 ---
 
