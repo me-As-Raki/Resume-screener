@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  :root {
+    --bg-color: #ffffff;
+    --text-color: #2c3e50;
+    --input-bg: #fdfdfd;
+    --input-border: #ccc;
+    --btn-bg: #2e86de;
+    --btn-hover: #1b4f72;
+    --logout-color: #c0392b;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+  }
+
+  [data-theme="dark"] {
+    --bg-color: #1e1e1e;
+    --text-color: #e0e0e0;
+    --input-bg: #2c2c2c;
+    --input-border: #555;
+    --btn-bg: #3498db;
+    --btn-hover: #2471a3;
+    --logout-color: #e74c3c;
+    --shadow-color: rgba(255, 255, 255, 0.05);
+  }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .dashboard-container {
+    max-width: 720px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: var(--bg-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .dashboard-container h2 {
+    font-size: 26px;
+    margin-bottom: 10px;
+    color: var(--text-color);
+    text-align: center;
+  }
+
+  .dashboard-container p {
+    font-size: 16px;
+    color: var(--text-color);
+    text-align: center;
+  }
+
+  .dashboard-container form {
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .dashboard-container label {
+    font-weight: 600;
+    color: var(--text-color);
+  }
+
+  .dashboard-container input[type="file"],
+  .dashboard-container textarea {
+    padding: 10px;
+    font-size: 15px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+  }
+
+  .dashboard-container textarea {
+    resize: vertical;
+  }
+
+  .dashboard-container button {
+    background-color: var(--btn-bg);
+    color: #fff;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .dashboard-container button:hover {
+    background-color: var(--btn-hover);
+  }
+
+  .logout-link {
+    display: block;
+    margin-top: 25px;
+    text-align: center;
+    color: var(--logout-color);
+    font-weight: bold;
+    text-decoration: none;
+  }
+
+  .logout-link:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<div class="dashboard-container">
+  <h2>Welcome, {{ user.name }}!</h2>
+  <p>You are logged in as a <strong>{{ user.role.capitalize() }}</strong>.</p>
+
+  <form method="POST" enctype="multipart/form-data" action="{{ url_for('main.analyze') }}">
+    <div>
+      <label for="resume">Upload Resume (PDF)</label>
+      <input type="file" id="resume" name="resume" accept=".pdf" required>
+    </div>
+
+    <div>
+      <label for="jd_text">Paste Job Description</label>
+      <textarea id="jd_text" name="jd_text" rows="6" placeholder="Paste job description here..." required></textarea>
+    </div>
+
+    <button type="submit">📊 Analyze Resume</button>
+  </form>
+
+  <a class="logout-link" href="{{ url_for('main.logout') }}">🚪 Logout</a>
+</div>
+
+<script>
+  // Optional: Detect system theme and apply to body
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (prefersDark) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+</script>
+{% endblock %}

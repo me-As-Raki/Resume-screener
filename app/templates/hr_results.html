@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 30px;
+    font-family: "Segoe UI", sans-serif;
+    color: #333;
+  }
+
+  h2 {
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .btn-shortlist-filter, .btn-back, .btn-shortlist {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s ease;
+    font-size: 14px;
+  }
+
+  .btn-shortlist-filter {
+    background-color: #1976d2;
+    color: white;
+  }
+
+  .btn-shortlist-filter:hover {
+    background-color: #1565c0;
+  }
+
+  .btn-back {
+    background-color: #e0e0e0;
+    color: #333;
+    margin-top: 20px;
+    display: inline-block;
+    text-decoration: none;
+  }
+
+  .btn-back:hover {
+    background-color: #bdbdbd;
+  }
+
+  .btn-shortlist {
+    background-color: #4caf50;
+    color: white;
+    font-size: 13px;
+    padding: 8px 16px;
+  }
+
+  .btn-shortlist:hover {
+    background-color: #388e3c;
+  }
+
+  .shortlisted {
+    background-color: #66bb6a !important;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 25px;
+  }
+
+  table thead {
+    background-color: #f5f5f5;
+    text-align: left;
+  }
+
+  table th, table td {
+    padding: 12px 10px;
+    border: 1px solid #ddd;
+    vertical-align: top;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+
+  .info-box {
+    margin-top: 30px;
+    padding: 20px;
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+  }
+
+  .info-box h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+  }
+</style>
+
+<div class="container">
+  <h2>📋 Screening Results</h2>
+  <p>Based on Job Description: <strong>{{ jd_text[:100] }}...</strong></p>
+
+  <form method="POST" action="{{ url_for('main.hr_bulk_analyze') }}">
+    <input type="hidden" name="filter" value="shortlisted">
+    <input type="hidden" name="jd_text" value="{{ jd_text }}">
+    <button type="submit" class="btn-shortlist-filter">🔍 Show Only Shortlisted</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resume</th>
+        <th>Match Score</th>
+        <th>Matched Skills</th>
+        <th>Missing Skills</th>
+        <th>Status</th>
+        <th>Contact Info</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for res in results %}
+      <tr>
+        <td>{{ res.filename or "Unnamed" }}</td>
+        <td><strong>{{ res.score }}%</strong></td>
+        <td>
+          {% if res.matched %}
+          <ul>
+            {% for skill in res.matched %}
+            <li>{{ skill }}</li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <em>No matched skills</em>
+          {% endif %}
+        </td>
+        <td>
+          {% if res.missing %}
+          <ul>
+            {% for skill in res.missing %}
+            <li>{{ skill }}</li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <em>No missing skills</em>
+          {% endif %}
+        </td>
+        <td>
+          {% if res.status == "message_sent" %}
+            <span style="color: green;">✉️ Message Sent</span>
+          {% elif res.status == "shortlisted" %}
+            ✅ Shortlisted
+          {% else %}
+            {{ res.status | default("Pending") }}
+          {% endif %}
+        </td>
+        <td>
+          {% if res.name or res.email or res.phone %}
+            {% if res.name %}<strong>Name:</strong> {{ res.name }}<br>{% endif %}
+            {% if res.email %}<strong>Email:</strong> {{ res.email }}<br>{% endif %}
+            {% if res.phone %}<strong>Phone:</strong> {{ res.phone }}{% endif %}
+          {% else %}
+            <em>No contact info found</em>
+          {% endif %}
+        </td>
+        <td>
+          {% if res.status == "shortlisted" %}
+            ✅ Already Shortlisted
+          {% elif res.status == "message_sent" %}
+            ✉️ Messaged
+          {% else %}
+          <button 
+            class="btn-shortlist" 
+            data-result-id="{{ res.id }}"
+            {% if res.status == 'shortlisted' %}disabled{% endif %}
+          >
+            {% if res.status == 'shortlisted' %}
+              ✅ Shortlisted
+            {% else %}
+              ✅ Shortlist
+            {% endif %}
+          </button>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <form method="POST" action="{{ url_for('main.send_hr_message') }}" onsubmit="return confirm('Are you sure you want to send messages to all shortlisted candidates with contact info?')">
+    <div class="info-box">
+      <h3>📨 Send Message to All Shortlisted Candidates</h3>
+      <p>This will only send to candidates who have an email or phone number. Others will be skipped automatically.</p>
+      <button type="submit" class="btn-shortlist-filter" style="background-color: #ef6c00;">
+        📤 Send Message to All
+      </button>
+    </div>
+  </form>
+
+  <a href="{{ url_for('main.dashboard') }}" class="btn-back">⬅ Back to Dashboard</a>
+</div>
+
+<script>
+document.querySelectorAll('.btn-shortlist').forEach(button => {
+  button.addEventListener('click', async () => {
+    const resultId = button.dataset.resultId;
+
+    const response = await fetch(`/shortlist/${resultId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      button.textContent = '✅ Shortlisted';
+      button.disabled = true;
+      button.classList.add('shortlisted');
+    } else {
+      alert('Shortlisting failed: ' + (data.error || 'Unknown error'));
+    }
+  });
+});
+</script>
+
+{% endblock %}

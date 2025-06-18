@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block head %}
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+  <style>
+    .container {
+      padding: 30px;
+      background-color: var(--card-color);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      font-size: 28px;
+      color: var(--text-color);
+    }
+
+    p {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    table.dataTable {
+      border-collapse: collapse !important;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    table.dataTable thead th {
+      background-color: #f5f5f5;
+      color: #333;
+      font-weight: bold;
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    table.dataTable tbody td {
+      padding: 12px;
+      background-color: #fff;
+      color: #333;
+    }
+
+    table.dataTable tbody tr:hover {
+      background-color: #f0f8ff;
+    }
+
+    .btn-back {
+      display: inline-block;
+      margin-top: 30px;
+      background-color: #2e86de;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: 0.3s ease;
+    }
+
+    .btn-back:hover {
+      background-color: #1e5fa2;
+    }
+
+    /* Dark mode support */
+    body.dark-mode table.dataTable thead th {
+      background-color: #333;
+      color: #ddd;
+    }
+
+    body.dark-mode table.dataTable tbody td {
+      background-color: #1f1f1f;
+      color: #ccc;
+    }
+
+    body.dark-mode table.dataTable tbody tr:hover {
+      background-color: #2d2d2d;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2>✉️ Messaged Candidates</h2>
+  <p>Below are candidates to whom messages were sent. Use the search, sort, or export options.</p>
+
+  <table id="candidatesTable" class="display nowrap" style="width:100%">
+    <thead>
+      <tr>
+        <th>Resume</th>
+        <th>Score</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Timestamp</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for res in results %}
+      <tr>
+        <td>{{ res.resume_filename or "Unnamed" }}</td>
+        <td>{{ res.match_score }}%</td>
+        <td>{{ res.extracted_name or "N/A" }}</td>
+        <td>{{ res.extracted_email or "N/A" }}</td>
+        <td>{{ res.extracted_phone or "N/A" }}</td>
+        <td>{{ res.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <a href="{{ url_for('main.dashboard') }}" class="btn-back">⬅ Back to Dashboard</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <!-- jQuery & DataTables -->
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+
+  <script>
+    $(document).ready(function () {
+      $('#candidatesTable').DataTable({
+        dom: 'Bfrtip',
+        buttons: ['csv', 'excel', 'print'],
+        responsive: true,
+        pageLength: 10,
+        order: [[5, 'desc']],
+        language: {
+          search: "🔍 Search:",
+          lengthMenu: "Show _MENU_ entries per page",
+          zeroRecords: "No matching candidates found",
+          info: "Showing _START_ to _END_ of _TOTAL_ candidates",
+          infoEmpty: "No candidates to show",
+          infoFiltered: "(filtered from _MAX_ total records)"
+        }
+      });
+    });
+  </script>
+{% endblock %}

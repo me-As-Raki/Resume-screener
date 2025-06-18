@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h2>📜 Resume Analysis History</h2>
+  {% if results %}
+    <ul>
+      {% for res in results %}
+        <li>
+          <strong>{{ res.timestamp.strftime('%Y-%m-%d %H:%M') }}</strong><br>
+          Score: {{ res.match_score }}%<br>
+          Matched: {{ res.matched_skills }}<br>
+          Missing: {{ res.missing_skills }}
+        </li>
+        <hr>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No analysis history found.</p>
+  {% endif %}
+</div>
+{% endblock %}

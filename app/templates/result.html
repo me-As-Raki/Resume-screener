@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  .suggestion-box {
+  background: #f9f9f9;
+  padding: 20px;
+  margin-top: 20px;
+  border-radius: 10px;
+  border-left: 5px solid #4CAF50;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.suggestion-box h3 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.suggestion-box ul {
+  list-style-type: disc;
+  padding-left: 20px;
+}
+
+.suggestion-box li {
+  margin-bottom: 10px;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+.suggestion-box li strong {
+  color: #007BFF;
+}
+
+  .result-container {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: var(--card-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .result-container h2,
+  .result-container h3 {
+    color: var(--text-color);
+    margin-bottom: 12px;
+  }
+
+  .result-container p,
+  .result-container ul {
+    color: var(--text-color);
+    font-size: 15px;
+  }
+
+  .result-container ul {
+    padding-left: 18px;
+  }
+
+  .ai-suggestions {
+    background-color: #f0f8ff;
+    border-left: 5px solid #17a2b8;
+    padding: 15px;
+    margin-top: 30px;
+    border-radius: 8px;
+  }
+
+  .btn-back {
+    display: inline-block;
+    margin-top: 25px;
+    padding: 10px 18px;
+    background-color: #2e86de;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .btn-back:hover {
+    background-color: #1b4f72;
+  }
+
+  canvas {
+    margin-top: 30px;
+    max-width: 100%;
+  }
+</style>
+
+<div class="result-container">
+  <h2>Hi {{ name }}, here’s your resume match analysis:</h2>
+
+  <p><strong>Match Score:</strong> {{ result.score }}%</p>
+
+  <h3>✅ Matched Skills:</h3>
+  <ul>
+    {% for skill in result.matched %}
+      <li>{{ skill }}</li>
+    {% endfor %}
+  </ul>
+
+  <h3>❌ Missing Skills:</h3>
+  <ul>
+    {% for skill in result.missing %}
+      <li>{{ skill }}</li>
+    {% endfor %}
+  </ul>
+
+  <h3>📊 Skill Match Visualization:</h3>
+  <canvas id="skillsChart" width="400" height="400"></canvas>
+
+  {% if suggestions %}
+    <h3 style="margin-top: 1rem; color: #2c3e50;">🧠 AI Resume Improvement Suggestions</h3>
+<ul style="list-style-type: disc; padding-left: 1.5rem; line-height: 1.8; font-family: 'Segoe UI', sans-serif;">
+  {% for line in suggestions.splitlines() if line.strip() %}
+    {% set label_and_text = line.split(':', 1) %}
+    <li>
+      <strong style="color: #1a73e8;">{{ label_and_text[0].strip() }}:</strong>
+      {% if label_and_text | length > 1 %}
+        {{ label_and_text[1].strip() }}
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul>
+
+  {% endif %}
+
+  <a href="{{ url_for('main.dashboard') }}" class="btn-back">← Back to Dashboard</a>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const matchedCount = {{ result.matched | length }};
+  const missingCount = {{ result.missing | length }};
+
+  const ctx = document.getElementById('skillsChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: ['Matched Skills', 'Missing Skills'],
+      datasets: [{
+        data: [matchedCount, missingCount],
+        backgroundColor: ['#27ae60', '#c0392b'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        },
+        title: {
+          display: true,
+          text: 'Resume vs JD Skill Match'
+        }
+      }
+    }
+  });
+</script>
+
+{% endblock %}
