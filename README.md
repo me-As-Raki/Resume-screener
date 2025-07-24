@@ -54,6 +54,19 @@ resume-screener/
 
 ---
 
+## 📸 App Screenshots
+
+<div style="overflow-x: auto; white-space: nowrap; padding: 10px;">
+
+  <img src="public/screenshots/page1.png" alt="Page 1" width="200" style="display: inline-block; margin-right: 10px;" />
+  <img src="public/screenshots/page2.png" alt="Page 2" width="200" style="display: inline-block; margin-right: 10px;" />
+  <img src="public/screenshots/page3.png" alt="Page 3" width="200" style="display: inline-block; margin-right: 10px;" />
+  <img src="public/screenshots/page4.png" alt="Page 4" width="200" style="display: inline-block; margin-right: 10px;" />
+  <img src="public/screenshots/page5.png" alt="Page 5" width="200" style="display: inline-block;" />
+
+</div>
+
+
 ## 🚀 How to Run This Project Locally
 
 ### 1. Clone the repository
