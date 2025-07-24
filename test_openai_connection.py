@@ -1,10 +1,16 @@
-from sqlalchemy import create_engine
+import psycopg2
+from psycopg2 import OperationalError
 
-url = "postgresql://resume_screener_db_user:uGpGLuhpFXZLbEY6CoyRbnxHQssq7YQ6@dpg-d193no7fte5s73bv75bg-a.oregon-postgres.render.com:5432/resume_screener_db?sslmode=require"
-engine = create_engine(url)
+# 🔗 Replace with your actual Railway DB URL
+DATABASE_URL = "postgresql://postgres:UsoNZuqheZOsjLHGlJWXejGsMUnUydQX@switchback.proxy.rlwy.net:14728/railway"
 
-try:
-    with engine.connect() as conn:
-        print("✅ Connected to PostgreSQL successfully!")
-except Exception as e:
-    print("❌ Error:", e)
+def check_postgres_connection():
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        conn.close()
+        print("✅ Database is reachable and running.")
+    except OperationalError as e:
+        print("❌ Database connection failed!")
+        print(f"Error: {e}")
+
+check_postgres_connection()

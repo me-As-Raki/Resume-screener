@@ -1,18 +1,130 @@
 {% extends "base.html" %}
 {% block content %}
+
+<style>
+    .form-container {
+        width: 400px;
+        margin: 40px auto;
+        background-color: #f3f4f6;
+        padding: 30px 40px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        font-family: "Segoe UI", sans-serif;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #2c3e50;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0 20px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 16px;
+    }
+
+    label {
+        font-size: 15px;
+        color: #333;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        background-color: #4e73df;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-top: 15px;
+    }
+
+    button:hover {
+        background-color: #3a5fc5;
+    }
+
+    .msg {
+        background-color: #fee2e2;
+        color: #b91c1c;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        border-left: 4px solid #ef4444;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .role-selector {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: start;
+        gap: 10px;
+        margin: 10px 0 20px 0;
+    }
+
+    p {
+        text-align: center;
+        font-size: 0.95rem;
+    }
+
+    .debug-box {
+        margin-top: 30px;
+        background: #fef3c7;
+        padding: 10px;
+        font-size: 13px;
+        border-radius: 8px;
+        color: #92400e;
+    }
+
+</style>
+
 <div class="form-container">
     <h2>Register</h2>
+
+    <!-- Flash Message Block -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="msg">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Registration Form -->
     <form method="POST">
         <input type="text" name="name" placeholder="Full Name" required>
         <input type="email" name="email" placeholder="Email Address" required>
         <input type="password" name="password" placeholder="Password" required>
 
         <label>Select Role:</label><br>
-        <label><input type="radio" name="role" value="hr" required> HR</label>
-        <label><input type="radio" name="role" value="candidate" required> Candidate</label>
+        <div class="role-selector">
+            <label><input type="radio" name="role" value="hr" required> HR</label>
+            <label><input type="radio" name="role" value="candidate" required> Candidate</label>
+        </div>
 
         <button type="submit">Register</button>
     </form>
+
     <p>Already have an account? <a href="{{ url_for('main.login') }}">Login</a></p>
+
+    <!-- Debug Output Log to See Form Values (Simulated Console Output) -->
+    {% if request.method == 'POST' %}
+    <div class="debug-box">
+        <strong>📦 Debug Info (POST)</strong><br>
+        Name: {{ request.form.get('name') }}<br>
+        Email: {{ request.form.get('email') }}<br>
+        Role: {{ request.form.get('role') }}<br>
+        Password: {{ '**' * ((request.form.get('password') | length) if request.form.get('password') else 0) }}
+    </div>
+    {% endif %}
 </div>
+
 {% endblock %}

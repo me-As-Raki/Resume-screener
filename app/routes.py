@@ -1,3 +1,4 @@
+import traceback
 from flask import jsonify, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from flask import Blueprint
@@ -19,38 +20,80 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 @main.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        role = request.form['role']
-        password = request.form['password']
+        name = request.form.get('name')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        role = request.form.get('role')
 
-        if User.query.filter_by(email=email).first():
+        print("📝 Register attempt received")
+        print(f"👉 Name: {name}, Email: {email}, Role: {role}")
+
+        if not name or not email or not password or not role:
+            print("❌ Missing required fields during registration")
+            flash('All fields are required.')
+            return redirect(url_for('main.register'))
+
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            print(f"⚠️ Email already registered: {email}")
             flash('Email already registered.')
             return redirect(url_for('main.register'))
 
-        user = User(name=name, email=email, role=role)
-        user.set_password(password)
-        db.session.add(user)
-        db.session.commit()
-        flash('Registered successfully. Please login.')
-        return redirect(url_for('main.login'))
+        try:
+            user = User(name=name, email=email, role=role)
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            print(f"✅ New user registered: {email}")
+            flash('Registered successfully. Please login.')
+            return redirect(url_for('main.login'))
+        except Exception as e:
+            print("❌ Exception during registration:")
+            traceback.print_exc()
+            flash('An error occurred during registration.')
+            return redirect(url_for('main.register'))
 
+    print("📄 Rendering registration page")
     return render_template('register.html')
 
 # -------------------- LOGIN --------------------
 @main.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        user = User.query.filter_by(email=email).first()
+        email = request.form.get('email')
+        password = request.form.get('password')
 
-        if user and user.check_password(password):
-            login_user(user)
-            flash(f'Welcome {user.name}!')
-            return redirect(url_for('main.dashboard'))
-        else:
-            flash('Invalid email or password.')
+        print("🔐 Login attempt received")
+        print(f"👉 Email: {email}")
+
+        if not email or not password:
+            print("❌ Missing email or password in login")
+            flash('Email and password are required.')
+            return redirect(url_for('main.login'))
+
+        try:
+            user = User.query.filter_by(email=email).first()
+
+            if user:
+                print(f"👤 Found user in DB: {user.email}")
+                if user.check_password(password):
+                    print(f"✅ Login successful for: {email}")
+                    login_user(user)
+                    flash(f'Welcome {user.name}!')
+                    return redirect(url_for('main.dashboard'))
+                else:
+                    print("❌ Incorrect password")
+                    flash('Invalid email or password.')
+            else:
+                print("❌ No user found with that email")
+                flash('Invalid email or password.')
+        except Exception as e:
+            print("❌ Exception during login:")
+            traceback.print_exc()
+            flash('An error occurred during login.')
+            return redirect(url_for('main.login'))
+
+    print("📄 Rendering login page")
     return render_template('login.html')
 # -------------------- ROOT PAGE --------------------
 @main.route('/')
